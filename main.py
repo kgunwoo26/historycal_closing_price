@@ -4,41 +4,51 @@ from dateutil.relativedelta import relativedelta
 
 price_List = list()
 compare_list = list()
-pre_list =list()
+pre_list = list()
 
-pre_date =None
-g=1
+pre_date: list  # No reason to use `None` when you even want to use as empty value.
+g = 1
 update_period = 6
 check_term = 6
-money = 100000
+money = 100_000
 
-check_date = datetime(2005,6,7)
+check_date = datetime(2005, 6, 7)
+
+
 # check_date = date + relativedelta(months=check_term)
 
-def date_to_string(date):   # 날짜 스트링 형태로 변경
-    d_year = str(date.year)
-    year = d_year[2:]
-    month = date.month
-    day = date.day
-    if(date.month <10) :
-        month=f"0{date.month}"
-    if(date.day <10) :
-        day=f"0{date.day}"
-    return f"{year}/{month}/{day}"
+def date_to_string(date: datetime) -> str:  # 날짜 스트링 형태로 변경
+    # d_year = str(date.year)
+    # year = d_year[2:]
+    # month = date.month
+    # day = date.day
+    # if date.month < 10:
+    #     month = f"0{date.month}"
+    # if date.day < 10:
+    #     day = f"0{date.day}"
+    # return f"{year}/{month}/{day}"
+
+    # Commenting due to using built-in function.
+    return date.strftime('%y/%m/%d')
 
 
-def cal_gap (new_val, old_val):  # 전 시점 대비 수익률 계산
-    # print("\nentered")
-    # if old_val != '' and new_val !='':
-    #     print(float(old_val)," -> ",float(new_val))
-    #     print("<",(float(new_val) / float(old_val) - 1) * 100,">")
-    return (float(new_val) / float(old_val) - 1) * 100  if old_val != '' and new_val !='' else ''
+def cal_gap(new_val: float, old_val: float):  # 전 시점 대비 수익률 계산
+    if old_val != '' and new_val != '':
+        # print('')
+        # print("entered")
+        # print(old_val, " -> ", new_val)
+        # print("<", str((float(new_val) / float(old_val) - 1) * 100), ">")
+        exp = (float(new_val) / float(old_val) - 1) * 100
+        return exp
+        # (float(new_val) / float(old_val) - 1) * 100 if float(old_val) != '' and float(new_val) != '' else ''
+    else:
+        return ''
 
 
 check_date_string = date_to_string(check_date)
 print(check_date_string)
 
-with open('src/List_csv3.csv', 'r') as f:
+with open('resources/List_csv3.csv', 'r') as f:
     reader = csv.reader(f)
     name_list = next(reader) # 종목명 열 패스
 
@@ -48,35 +58,35 @@ with open('src/List_csv3.csv', 'r') as f:
             check_date = check_date + relativedelta(months=check_term)
             check_date_string = date_to_string(check_date)
             # print(check_date_string)
-        if i[0] >= check_date_string:  # 해당 날짜가 없는 경우 마지막 조회 날짜로 지정
-            if pre_date != None:
+        elif i[0] >= check_date_string:
+            if len(pre_date) != 0:
                 price_List.append(pre_date)
                 check_date = check_date + relativedelta(months=check_term)
                 check_date_string = date_to_string(check_date)
                 # print(pre_date[0])
         pre_date = i # 마지막 조회 날짜 저장
 
-
 name_list[0] = "no winner"
 
 for num in price_List:
-    # print("\ncompare :")
+    # print('')
+    # print("compare :")
     # print(pre_list)
     today = num[0]
     if num[0] != check_date_string:   # 수익률 compare_list에 저장
 
-        i=0
+        i = 0
         for price in num:
-            if(g == 1):
+            if g == 1:
                 g = 0
                 continue
-            if len(pre_list) == len(num)-1:     # 두번째 달부터
-                if(len(compare_list) == len(num)-1):    # 세번째 달부터
-                    compare_list[i] = cal_gap(price,pre_list[i])
-                else:                                   #  두번째 달일 경우
-                    compare_list.append( cal_gap(price,pre_list[i]))
+            if len(pre_list) == len(num) - 1:  # 두번째 달부터
+                if len(compare_list) == len(num) - 1:  # 세번째 달부터
+                    compare_list[i] = cal_gap(price, pre_list[i])
+                else:  # 두번째 달일 경우
+                    compare_list.append(cal_gap(price, pre_list[i]))
                 pre_list[i] = price
-            else :                              # 첫번째 달일 경우
+            else:  # 첫번째 달일 경우
                 pre_list.append(price)
             i += 1
         g = 1
@@ -86,11 +96,9 @@ for num in price_List:
         max = -1
         num_max = -1
         for value in compare_list:
-            if value !='' and value > max:
+            if value != '' and value > max:
                 num_max = count_max
                 max = value
             count_max += 1
 
-        print("date:", today, "win=",name_list[num_max+1], "max:", max)
-
-
+        print("date:", today, "win=", name_list[num_max + 1], "max:", max)
