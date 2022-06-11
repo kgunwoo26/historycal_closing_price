@@ -6,7 +6,7 @@ price_List = list()
 compare_list = list()
 pre_list = list()
 
-pre_date = None
+pre_date: list  # No reason to use `None` when you even want to use as empty value.
 g = 1
 update_period = 6
 check_term = 6
@@ -59,7 +59,7 @@ with open('resources/List_csv3.csv', 'r') as f:
             check_date_string = date_to_string(check_date)
             # print(check_date_string)
         elif i[0] >= check_date_string:
-            if pre_date == '':
+            if len(pre_date) != 0:
                 price_List.append(pre_date)
                 check_date = check_date + relativedelta(months=check_term)
                 check_date_string = date_to_string(check_date)
