@@ -17,24 +17,32 @@ check_date = datetime(2005, 6, 7)
 
 # check_date = date + relativedelta(months=check_term)
 
-def date_to_string(date):  # 날짜 스트링 형태로 변경
-    d_year = str(date.year)
-    year = d_year[2:]
-    month = date.month
-    day = date.day
-    if date.month < 10:
-        month = f"0{date.month}"
-    if date.day < 10:
-        day = f"0{date.day}"
-    return f"{year}/{month}/{day}"
+def date_to_string(date: datetime) -> str:  # 날짜 스트링 형태로 변경
+    # d_year = str(date.year)
+    # year = d_year[2:]
+    # month = date.month
+    # day = date.day
+    # if date.month < 10:
+    #     month = f"0{date.month}"
+    # if date.day < 10:
+    #     day = f"0{date.day}"
+    # return f"{year}/{month}/{day}"
+
+    # Commenting due to using built-in function.
+    return date.strftime('%y/%m/%d')
 
 
-def cal_gap(new_val, old_val):  # 전 시점 대비 수익률 계산
-    # print("\nentered")
-    # if old_val != '' and new_val !='':
-    #     print(float(old_val)," -> ",float(new_val))
-    #     print("<",(float(new_val) / float(old_val) - 1) * 100,">")
-    return (float(new_val) / float(old_val) - 1) * 100 if old_val != '' and new_val != '' else ''
+def cal_gap(new_val: float, old_val: float):  # 전 시점 대비 수익률 계산
+    if old_val != '' and new_val != '':
+        # print('')
+        # print("entered")
+        # print(old_val, " -> ", new_val)
+        # print("<", str((float(new_val) / float(old_val) - 1) * 100), ">")
+        exp = (float(new_val) / float(old_val) - 1) * 100
+        return exp
+        # (float(new_val) / float(old_val) - 1) * 100 if float(old_val) != '' and float(new_val) != '' else ''
+    else:
+        return ''
 
 
 check_date_string = date_to_string(check_date)
@@ -50,8 +58,8 @@ with open('resources/List_csv3.csv', 'r') as f:
             check_date = check_date + relativedelta(months=check_term)
             check_date_string = date_to_string(check_date)
             # print(check_date_string)
-        if i[0] >= check_date_string:
-            if pre_date is None:
+        elif i[0] >= check_date_string:
+            if pre_date == '':
                 price_List.append(pre_date)
                 check_date = check_date + relativedelta(months=check_term)
                 check_date_string = date_to_string(check_date)
@@ -61,7 +69,8 @@ with open('resources/List_csv3.csv', 'r') as f:
 name_list[0] = "no winner"
 
 for num in price_List:
-    # print("\ncompare :")
+    # print('')
+    # print("compare :")
     # print(pre_list)
     today = num[0]
     if num[0] != check_date_string:
