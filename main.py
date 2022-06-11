@@ -6,7 +6,6 @@ price_List = list()
 compare_list = list()
 pre_list =list()
 
-
 pre_date =None
 g=1
 update_period = 6
@@ -41,21 +40,21 @@ print(check_date_string)
 
 with open('src/List_csv3.csv', 'r') as f:
     reader = csv.reader(f)
-    name_list = next(reader)
+    name_list = next(reader) # 종목명 열 패스
 
     for i in reader:
-        if i[0] == check_date_string:
+        if i[0] == check_date_string:   # 날짜를 찾은 경우
             price_List.append(i)
             check_date = check_date + relativedelta(months=check_term)
             check_date_string = date_to_string(check_date)
             # print(check_date_string)
-        if i[0] >= check_date_string:
+        if i[0] >= check_date_string:  # 해당 날짜가 없는 경우 마지막 조회 날짜로 지정
             if pre_date != None:
                 price_List.append(pre_date)
                 check_date = check_date + relativedelta(months=check_term)
                 check_date_string = date_to_string(check_date)
                 # print(pre_date[0])
-        pre_date = i
+        pre_date = i # 마지막 조회 날짜 저장
 
 
 name_list[0] = "no winner"
@@ -64,7 +63,7 @@ for num in price_List:
     # print("\ncompare :")
     # print(pre_list)
     today = num[0]
-    if num[0] != check_date_string:
+    if num[0] != check_date_string:   # 수익률 compare_list에 저장
 
         i=0
         for price in num:
@@ -82,7 +81,7 @@ for num in price_List:
             i += 1
         g = 1
 
-    if len(compare_list)!= 0:
+    if len(compare_list)!= 0:   # max값을 지정
         count_max = 0
         max = -1
         num_max = -1
