@@ -2,21 +2,12 @@ import csv
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-check_date_List = list()
-compare_list = list()
-pre_list = list()
-
-update_period = 2  # 포트폴리오 정비 주기
-check_term = 6  # 조사 주기
+update_period = 1  # 포트폴리오 정비 주기
+check_term = 1  # 조사 주기
 seed_money = 100
-
+file_name = 'resources/List_csv3.csv'
 target_date = datetime(2022, 6, 7)  # 기준 날짜 설정, 최대 22/06/07
-
 start_date = target_date
-
-
-# check_date = date + relativedelta(months=check_term)
-
 
 def date_to_string(date: datetime) -> str:  # 날짜 스트링 형태로 변경
     return date.strftime('%y/%m/%d')
@@ -24,16 +15,12 @@ def date_to_string(date: datetime) -> str:  # 날짜 스트링 형태로 변경
 
 while '05/06/07' < date_to_string(start_date):  # 기준 날짜와 정비 주기 기준으로 시작 날짜 설정
     start_date = start_date + relativedelta(months=-update_period)
-
 check_date = start_date + relativedelta(months=update_period)
 
 
 def cal_gap(new_val: float, old_val: float):  # 전 시점 대비 수익률 계산
-    if old_val != '' and new_val != '' and type(old_val) is not str and type(new_val) is not str:
-        # print('')
-        # print("entered")
-        # print(old_val, " -> ", new_val)
-        # print("<", str((float(new_val) / float(old_val) - 1) * 100), ">")
+    if old_val != '' and new_val != '':
+            # and type(old_val) is not str and type(new_val) is not str:
         exp = (float(new_val) / float(old_val) - 1) * 100
         return exp
         # (float(new_val) / float(old_val) - 1) * 100 if float(old_val) != '' and float(new_val) != '' else ''
@@ -41,35 +28,30 @@ def cal_gap(new_val: float, old_val: float):  # 전 시점 대비 수익률 계�
         return ''
 
 
-def cal_highest_stock(check_date, check_term):
-    # TODO: Function is too long.
-    # TODO: Function should do one thing at one time. Should've been separated.
-
-    pre_date = {}  # No reason to use `None` when you even want to use as empty value.
-    g = 1  # TODO: Never used.
-    best_stock: str
-    p_found = c_found = 0
-    num_max = -1  # TODO: Never used.
-    check_date = check_date + relativedelta(months=-check_term)  # TODO: Assigning values to parameter is awkward.
+def create_compare_list(date, term):
+    mcheck_term = term
+    check_date= date
+    check_date_List = list()
+    compare_list = list()
     check_date_string = date_to_string(check_date)
-    print(check_date_string)
+    pre_list = list()
+    p_found = c_found = 0
 
-    with open('resources/List_csv3.csv', 'r') as f:
+    with open(file_name , 'r') as f:
         reader = csv.reader(f)
-        name_list = next(reader)  # 종목명 열 패스
+        next(reader)  # 종목명 열 패스
 
         for i in reader:
             if i[0] == check_date_string and p_found == 0:  # 날짜를 찾은 경우
                 pre_list.append(i)
-                check_date = check_date + relativedelta(months=check_term)  # TODO: Assigning values to parameter is awkward.
+                check_date = check_date + relativedelta(months=mcheck_term)  # TODO: Assigning values to parameter is awkward.
                 check_date_string = date_to_string(check_date)
                 p_found = 1
-                # print(check_date_string)
             elif i[0] >= check_date_string and p_found == 0:
                 if len(pre_date) != 0:
                     pre_list.append(pre_date)
-                    # TODO: What is different with line 64-66?
-                    check_date = check_date + relativedelta(months=check_term)
+                    # TODO: What is different with line 64-66? - 해당 날짜에 없을 경우 (6월 7일 휴장인 경우) 그 이전 데이터 가져오도록 구분했습니다
+                    check_date = check_date + relativedelta(months=mcheck_term)
                     check_date_string = date_to_string(check_date)
                     p_found = 1
 
@@ -85,58 +67,64 @@ def cal_highest_stock(check_date, check_term):
                     check_date_List.append(pre_date)
                     break
             pre_date = i  # 마지막 조회 날짜 저장
-    name_list[0] = "no winner"
 
+    # print(check_date_List)
+    # print(pre_list)
     for num in check_date_List:
-        # print('')
-        # print("compare :")
-        # print(pre_list)
         today = num[0]
-        if num[0] != check_date_string:  # 수익률 compare_list에 저장
-            i = 0
-            for price in num:
-                if len(pre_list) != 0 and len(pre_list) > i:  # To prevent out of index of `pre_list`.
-                    compare_list.append(cal_gap(price, pre_list[i]))
-                i += 1
-            # i = 0
-            # for price in num:
-            #     if g == 1:
-            #         g = 0
-            #         continue
-            #     if len(pre_list) == len(num) - 1:  # 두번째 달부터
-            #         if len(compare_list) == len(num) - 1:  # 세번째 달부터
-            #             compare_list[i] = cal_gap(price, pre_list[i])
-            #         else:  # 두번째 달일 경우
-            #             compare_list.append(cal_gap(price, pre_list[i]))
-            #         pre_list[i] = price
-            #     else:  # 첫번째 달일 경우
-            #         pre_list.append(price)
-            #     i += 1
-            # g = 1
+        i = 0
+        for price in num:
+            if len(pre_list) != 0 and i!=0:  # To prevent out of index of `pre_list`.
+                compare_list.append(cal_gap(price, pre_list[0][i]))
+            i += 1
+    return compare_list
 
-        if len(compare_list) != 0:  # max값을 지정
-            print("not empty")
-            count_max = 0
-            max = -1
-            num_max = -1
-            for value in compare_list:
-                if value != '' and value > max:
-                    num_max = count_max
-                    max = value
-                count_max += 1
-            best_stock = name_list[num_max + 1];
-            print("date:", today, "win=", best_stock, "max:", max)
+def find_stock_name(num):
+    with open(file_name , 'r') as f:
+        reader = csv.reader(f)
+        name_list = next(reader)  # 종목명 열 패스
+    return name_list[num]
+
+
+def cal_highest_stock(date, term):
+
+    check_date_List = list()
+    compare_list = list()
+    pre_list = list()
+
+    check_date = date
+    check_term = term
+    pre_date = {}
+    best_stock: str
+
+    num_max = -1
+    check_date = check_date + relativedelta(months=-check_term)
+
+
+    compare_list = create_compare_list(check_date,check_term)
+
+    if len(compare_list) != 0:  # max값을 지정
+        count_max = 0
+        max = -1
+        for value in compare_list:
+            if value != '' and value > max:
+                num_max = count_max
+                max = value
+            count_max += 1
+        best_stock = num_max + 1;
+        # print( "win=", find_stock_name(best_stock), "max:", max)
     check_date_List.clear()
     compare_list.clear()
     pre_list.clear()
+    return num_max+1
 
+result_list = list()
 
 while date_to_string(check_date) <= '22/06/07':
-    print("\n\n", "start date:", check_date)
     check_date = check_date + relativedelta(months=update_period)
-    cal_highest_stock(check_date, check_term);
+    # print("\n\n", "start date:", check_date)
+    result_list.append(cal_highest_stock(check_date, check_term))
 
-# if num_max != -1 and compare_list[num_max] != '':  # TODO: 마지막 수익률 못 구해 코드 위치 수정 필요
-#     money = money * float(compare_list[num_max] + 100) / 100
-#     print(compare_list[num_max])
-#     print("money:", money);
+    # seed_money = seed_money * float(earn + 100)/100
+print(result_list)
+print(len(result_list))
