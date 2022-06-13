@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas_datareader as pdr
 
 update_period = 6  # 포트폴리오 정비 주기
-check_term = 6  # 조사 주기
+check_term = 3  # 조사 주기
 seed_money = 100
 file_name = 'resources/test.csv'
 snp_file_name = 'resources/S&P 500 내역.csv'
@@ -157,9 +157,9 @@ def cal_highest_stock(date, term ):
 
 result_list = list()
 
-def check_earning(date, term ,count):
+def check_earning(date, period ,count):
     check_date = date
-    check_term = term
+    update_period = period
     check_date_string = date_to_string(check_date)
     list_count = count
 
@@ -175,7 +175,7 @@ def check_earning(date, term ,count):
 
             if i[0] == check_date_string :  # 날짜를 찾은 경우
 
-                check_date = check_date + relativedelta(months=check_term)
+                check_date = check_date + relativedelta(months=update_period)
                 check_date_string = date_to_string(check_date)
                 now_price = i[result_list[list_count]]
                 if pre_price != None and result_list[list_count] != 0:
@@ -186,7 +186,7 @@ def check_earning(date, term ,count):
             elif i[0] >= check_date_string :
                 if len(pre_date) != 0:
                     now_price = pre_date[result_list[list_count]]
-                    check_date = check_date + relativedelta(months=check_term)
+                    check_date = check_date + relativedelta(months=update_period)
                     check_date_string = date_to_string(check_date)
 
                     if pre_price != None and result_list[list_count] != 0:
@@ -262,7 +262,7 @@ money =seed_money
 while date_to_string(check_date) <= '22/06/07':
     # print("\n\n", "start date:", check_date)
     check_date = check_date + relativedelta(months=update_period)
-    earn_rate =check_earning(check_date,check_term, list_count)
+    earn_rate =check_earning(check_date,update_period, list_count)
 
     if type(earn_rate) == float:
         # if float(snp_data[snp_count]) <= earn_rate:
